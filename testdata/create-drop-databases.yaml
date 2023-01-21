@@ -1,0 +1,11 @@
+preparation:
+  - CREATE DATABASE dying
+config:
+  databases:
+    - spawning
+  tombstoned_databases:
+    - dying
+expected:
+- "/*                          */ CREATE DATABASE spawning"
+- "/*                          */ DROP DATABASE dying"
+no_second_run: true

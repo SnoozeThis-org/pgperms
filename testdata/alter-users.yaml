@@ -1,0 +1,28 @@
+preparation:
+  - CREATE ROLE orphan LOGIN
+  - CREATE ROLE superman CREATEDB LOGIN
+  - CREATE ROLE replication LOGIN REPLICATION
+  - CREATE ROLE someuser
+  - CREATE ROLE somerole
+config:
+  roles:
+    someuser:
+      password: hackme
+      validuntil: "2000-01-01T13:00:00Z"
+    somerole:
+      login: false
+    orphan:
+      inherit: false
+    superman:
+      superuser: true
+      createdb: true
+      createrole: true
+      bypassrls: true
+    replication:
+      replication: true
+      connectionlimit: 5
+expected:
+- "/*                          */ ALTER ROLE orphan NOINHERIT"
+- "/*                          */ ALTER ROLE replication CONNECTION LIMIT 5"
+- "/*                          */ ALTER ROLE someuser PASSWORD 'hackme' VALID UNTIL '2000-01-01T13:00:00Z' LOGIN"
+- "/*                          */ ALTER ROLE superman SUPERUSER CREATEROLE BYPASSRLS"

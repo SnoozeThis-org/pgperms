@@ -1,0 +1,23 @@
+config:
+  roles:
+    someuser:
+      password: hackme
+      validuntil: "2000-01-01T13:00:00Z"
+    somerole:
+      login: false
+    orphan:
+      inherit: false
+    superman:
+      superuser: true
+      createdb: true
+      createrole: true
+      bypassrls: true
+    replication:
+      replication: true
+      connectionlimit: 5
+expected:
+- "/*                          */ CREATE ROLE orphan NOINHERIT LOGIN"
+- "/*                          */ CREATE ROLE replication LOGIN REPLICATION CONNECTION LIMIT 5"
+- "/*                          */ CREATE ROLE somerole"
+- "/*                          */ CREATE ROLE someuser LOGIN PASSWORD 'hackme' VALID UNTIL '2000-01-01T13:00:00Z'"
+- "/*                          */ CREATE ROLE superman SUPERUSER CREATEDB CREATEROLE LOGIN BYPASSRLS"

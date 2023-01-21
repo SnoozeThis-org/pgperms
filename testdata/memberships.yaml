@@ -1,0 +1,26 @@
+preparation:
+  - CREATE USER grandfather
+  - CREATE USER daddy
+  - CREATE ROLE goner
+  - CREATE USER sibling IN ROLE goner, grandfather
+config:
+  roles:
+    grandfather:
+    daddy:
+      member_of: 
+      - grandfather
+    kiddo:
+      member_of: 
+      - daddy
+    sibling:
+      member_of: 
+      - daddy
+  tombstoned_roles:
+    - goner
+expected:
+- "/*                          */ CREATE ROLE kiddo LOGIN"
+- "/*                          */ DROP ROLE goner"
+- "/*                          */ GRANT daddy TO kiddo"
+- "/*                          */ GRANT daddy TO sibling"
+- "/*                          */ GRANT grandfather TO daddy"
+- "/*                          */ REVOKE grandfather FROM sibling"
