@@ -28,21 +28,21 @@ To delete users, you have to list them as tombstoned users. (If you were to simp
 
 ```yaml
 roles:
-	yourname:
-		password: SCRAM-SHA-256$4096:ICus8JAbG67BUVc+bifCBg==$3ULFbqx6ySVZJr51b6DOVQIbqy3GxrsHyxb/+JD0pag=:TJyct6ApBeiTdr+z7RP8CXtTOO5w+iK3NEervm9Ezb0=
-		superuser: true
-	rolegroup:
-		login: false
-	someonewithlotsofsettings:
-		createdb: true
-		createrole: true
-		bypassrls: true
-		inherit: true
-		connectionlimit: 3
-		valid_until: "2038-01-01 00:00:00"
-		member_of: [rolegroup]
-	replication:
-		replication: true
+  yourname:
+    password: SCRAM-SHA-256$4096:ICus8JAbG67BUVc+bifCBg==$3ULFbqx6ySVZJr51b6DOVQIbqy3GxrsHyxb/+JD0pag=:TJyct6ApBeiTdr+z7RP8CXtTOO5w+iK3NEervm9Ezb0=
+    superuser: true
+  rolegroup:
+    login: false
+  someonewithlotsofsettings:
+    createdb: true
+    createrole: true
+    bypassrls: true
+    inherit: true
+    connectionlimit: 3
+    valid_until: "2038-01-01 00:00:00"
+    member_of: [rolegroup]
+  replication:
+    replication: true
 tombstoned_roles:
 - oldemployee
 ```
@@ -69,24 +69,24 @@ Permissions are configured like this:
 
 ```yaml
 database_privileges:
-	- roles: [rolegroup]
-		privileges: [CONNECT]
-		databases:
-			- mydatabase
-	- roles: [someonewithlotsofsettings]
-		privileges: [CONNECT, TEMPORARY]
-		databases:
-			- mydatabase
+  - roles: [rolegroup]
+    privileges: [CONNECT]
+    databases:
+      - mydatabase
+  - roles: [someonewithlotsofsettings]
+    privileges: [CONNECT, TEMPORARY]
+    databases:
+      - mydatabase
 
 schema_privileges:
-	- roles: [rolegroup]
-		privileges: [USAGE]
-		schemas:
-			- mydatabase.myschema
-	- roles: [someonewithlotsofsettings]
-		privileges: [CREATE, USAGE]
-		schemas:
-			- mydatabase.myschema
+  - roles: [rolegroup]
+    privileges: [USAGE]
+    schemas:
+      - mydatabase.myschema
+  - roles: [someonewithlotsofsettings]
+    privileges: [CREATE, USAGE]
+    schemas:
+      - mydatabase.myschema
 ```
 
 ## Table permissions
@@ -99,11 +99,11 @@ You can also configure the permissions for views, materialized views, foreign ta
 
 ```yaml
 table_privileges:
-	- roles: [rolegroup]
-		privileges: [SELECT, INSERT, UPDATE]
-		tables:
-			- mydatabase.myschema.mytable
-			- mydatabase.otherschema.*
+  - roles: [rolegroup]
+    privileges: [SELECT, INSERT, UPDATE]
+    tables:
+      - mydatabase.myschema.mytable
+      - mydatabase.otherschema.*
 ```
 
 ## Sequence permissions
