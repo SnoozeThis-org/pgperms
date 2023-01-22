@@ -105,7 +105,20 @@ func (v *validator) validatePrivileges(what string, privs []GenericPrivilege) {
 		if unknown := stringlib.Diff(p.Privileges, validPrivileges[what]); len(unknown) > 0 {
 			v.addErrorf("%s: privilege has invalid privileges %v for %s_privileges", src, unknown, what[:len(what)-1])
 		}
-		// TODO: Verify this refers to a database+schema that we know (or at least don't ignore)
+		for _, tgt := range p.untypedTargets() {
+			db, remaining := splitObjectName(tgt)
+			if db != "" && !lo.Contains(v.definedDatabases, db) {
+				v.addErrorf("%s: privilege specified for unmanaged database %q", src, db)
+			}
+			schema, remaining := splitObjectName(remaining)
+			if schema == "" {
+				schema = remaining
+			}
+			fullSchema := joinSchemaName(db, schema)
+			if schema != "" && !lo.Contains(v.definedSchemas, fullSchema) {
+				v.addErrorf("%s: privilege specified for unmanaged schema %q", src, fullSchema)
+			}
+		}
 		for _, r := range p.Roles {
 			v.checkRole(src, r)
 		}

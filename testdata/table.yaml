@@ -5,6 +5,8 @@ config:
     someone:
   databases:
     - postgres
+  schemas:
+    - postgres.public
   table_privileges:
   - roles: [someone]
     privileges: [SELECT, INSERT, UPDATE, DELETE]

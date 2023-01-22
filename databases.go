@@ -35,9 +35,7 @@ func fetchSchemas(ctx context.Context, conn *pgx.Conn, database string) ([]strin
 		if err := rows.Scan(&schema); err != nil {
 			return nil, err
 		}
-		if schema != "public" {
-			names = append(names, joinSchemaName(database, schema))
-		}
+		names = append(names, joinSchemaName(database, schema))
 	}
 	return names, nil
 }
