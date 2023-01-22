@@ -22,7 +22,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5415
+          - 5415:5432
       postgres14:
         image: postgres:14
         env:
@@ -34,7 +34,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5414
+          - 5214:5432
       postgres13:
         image: postgres:13
         env:
@@ -46,7 +46,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5413
+          - 5413:5432
       postgres12:
         image: postgres:12
         env:
@@ -58,7 +58,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5412
+          - 5412:5432
       postgres11:
         image: postgres:11
         env:
@@ -70,7 +70,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5411
+          - 5411:5432
 
     steps:
     - uses: actions/checkout@v3
