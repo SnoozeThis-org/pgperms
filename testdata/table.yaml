@@ -3,10 +3,12 @@ preparation:
 config:
   roles:
     someone:
+  databases:
+    - postgres
   table_privileges:
   - roles: [someone]
     privileges: [SELECT, INSERT, UPDATE, DELETE]
     tables: [postgres.public.abc]
 expected:
 - "/*                          */ CREATE ROLE someone LOGIN"
-- "/*                          */ GRANT SELECT, INSERT, UPDATE, DELETE ON abc TO someone"
+- "/*                 postgres */ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.abc TO someone"
