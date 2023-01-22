@@ -11,8 +11,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres
+      postgres15:
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: testingpassword
         # Set health checks to wait until postgres has started
@@ -22,7 +22,55 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432
+          - 5432:5415
+      postgres14:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: testingpassword
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5414
+      postgres13:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: testingpassword
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5413
+      postgres12:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: testingpassword
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5412
+      postgres11:
+        image: postgres:11
+        env:
+          POSTGRES_PASSWORD: testingpassword
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5411
 
     steps:
     - uses: actions/checkout@v3
@@ -45,7 +93,31 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
+    - name: Test on PostgreSQL 15
       run: go test -v ./...
       env:
-        TESTING_DSN: host=localhost user=postgres password=testingpassword
+        TESTING_DSN: host=localhost port=5415 user=postgres password=testingpassword
+
+    - name: Test on PostgreSQL 14
+      if: always()
+      run: go test -v ./...
+      env:
+        TESTING_DSN: host=localhost port=5414 user=postgres password=testingpassword
+
+    - name: Test on PostgreSQL 13
+      if: always()
+      run: go test -v ./...
+      env:
+        TESTING_DSN: host=localhost port=5413 user=postgres password=testingpassword
+
+    - name: Test on PostgreSQL 12
+      if: always()
+      run: go test -v ./...
+      env:
+        TESTING_DSN: host=localhost port=5412 user=postgres password=testingpassword
+
+    - name: Test on PostgreSQL 11
+      if: always()
+      run: go test -v ./...
+      env:
+        TESTING_DSN: host=localhost port=5411 user=postgres password=testingpassword
