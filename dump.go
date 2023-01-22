@@ -10,7 +10,7 @@ import (
 )
 
 func Dump(ctx context.Context, conns *Connections) (string, error) {
-	c, err := Gather(ctx, conns, nil)
+	c, err := Gather(ctx, conns, nil, nil)
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +25,7 @@ func Dump(ctx context.Context, conns *Connections) (string, error) {
 	return string(b), nil
 }
 
-func Gather(ctx context.Context, conns *Connections, interestingRoles []string) (*Config, error) {
+func Gather(ctx context.Context, conns *Connections, interestingRoles, interestingDatabases []string) (*Config, error) {
 	var d dfr.D
 	defer d.Run(nil)
 	var ret Config
@@ -41,11 +41,14 @@ func Gather(ctx context.Context, conns *Connections, interestingRoles []string) 
 	if err != nil {
 		return nil, err
 	}
-	ret.DatabasePrivileges, err = fetchDatabasesPrivileges(ctx, conns.primary, interestingRoles)
+	if len(interestingDatabases) == 0 {
+		interestingDatabases = ret.Databases
+	}
+	ret.DatabasePrivileges, err = fetchDatabasesPrivileges(ctx, conns.primary, interestingRoles, interestingDatabases)
 	if err != nil {
 		return nil, err
 	}
-	for _, dbname := range ret.Databases {
+	for _, dbname := range lo.Intersect(interestingDatabases, ret.Databases) {
 		dbconn, deref, err := conns.Get(dbname)
 		if err != nil {
 			return nil, err
@@ -85,7 +88,7 @@ func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) 
 	if err := ValidateConfig(&d); err != nil {
 		return err
 	}
-	actual, err := Gather(ctx, conns, lo.Keys(d.Roles))
+	actual, err := Gather(ctx, conns, lo.Keys(d.Roles), d.Databases)
 	if err != nil {
 		return err
 	}

@@ -206,8 +206,8 @@ func fetchTablePrivileges(ctx context.Context, conn *pgx.Conn, database string, 
 	return tables, sequences, nil
 }
 
-func fetchDatabasesPrivileges(ctx context.Context, conn *pgx.Conn, interestingUsers []string) ([]GenericPrivilege, error) {
-	rows, err := conn.Query(ctx, "SELECT datname, pg_get_userbyid(grantee) AS grantee, privilege_type, is_grantable FROM pg_catalog.pg_database, aclexplode(datacl) WHERE datallowconn AND pg_get_userbyid(grantee) = ANY($1)", interestingUsers)
+func fetchDatabasesPrivileges(ctx context.Context, conn *pgx.Conn, interestingUsers, interestingDatabases []string) ([]GenericPrivilege, error) {
+	rows, err := conn.Query(ctx, "SELECT datname, pg_get_userbyid(grantee) AS grantee, privilege_type, is_grantable FROM pg_catalog.pg_database, aclexplode(datacl) WHERE datallowconn AND datname = ANY($1) AND pg_get_userbyid(grantee) = ANY($2)", interestingDatabases, interestingUsers)
 	if err != nil {
 		return nil, err
 	}
