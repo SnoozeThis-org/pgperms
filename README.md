@@ -2,6 +2,12 @@
 
 pgperms allows you to manage your PostgreSQL permissions in a configuration file. This follows the configuration as code paradigm and allows you to declaratively manage your PostgreSQL grants.
 
+## Installation
+
+```shell
+go install github.com/SnoozeThis-org/pgperms/cmd/pgperms@latest
+```
+
 ## Getting started
 
 If you already have an existing PostgreSQL cluster running, you can create pgperms config file from that database through:
