@@ -106,7 +106,7 @@ func TestEndToEnd(t *testing.T) {
 
 func checkClusterIsEmpty(ctx context.Context, t *testing.T, conn *pgx.Conn) {
 	checkNoResults(ctx, t, conn, "SELECT datname FROM pg_catalog.pg_database WHERE datname NOT IN ('postgres', 'template0', 'template1')", "Database is not empty: found catalog %s")
-	checkNoResults(ctx, t, conn, "SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname NOT IN ('public', 'pg_catalog', 'information_schema', 'pg_toast')", "Database is not empty: found schema %s")
+	checkNoResults(ctx, t, conn, "SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname NOT IN ('public', 'pg_catalog', 'information_schema', 'pg_toast') AND nspname NOT LIKE 'pg_temp_%' AND nspname NOT LIKE 'pg_toast_temp_%'", "Database is not empty: found schema %s")
 	checkNoResults(ctx, t, conn, "SELECT rolname FROM pg_catalog.pg_authid WHERE rolname NOT LIKE 'pg_%' AND rolname!='postgres'", "Database is not empty: found user %s")
 	checkNoResults(ctx, t, conn, "SELECT relname FROM pg_catalog.pg_class WHERE relnamespace NOT IN (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname IN ('pg_catalog', 'information_schema', 'pg_toast'))", "Database is not empty: found table %s")
 	if t.Failed() {
