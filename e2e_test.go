@@ -14,10 +14,10 @@ import (
 )
 
 type TestCase struct {
-	Preparation []string     `yaml:"preparation"`
+	Preparation []string        `yaml:"preparation"`
 	Config      *pgperms.Config `yaml:"config"`
-	Expected    []string     `yaml:"expected"`
-	NoSecondRun bool         `yaml:"no_second_run"`
+	Expected    []string        `yaml:"expected"`
+	NoSecondRun bool            `yaml:"no_second_run"`
 }
 
 func TestEndToEnd(t *testing.T) {

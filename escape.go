@@ -16,7 +16,7 @@ func Escape(s string) string {
 	encodingType := ""
 	var buf bytes.Buffer
 	buf.WriteByte('\'')
-	buf.Grow(len(s)+2)
+	buf.Grow(len(s) + 2)
 	for _, c := range s {
 		switch c {
 		case '\'':
