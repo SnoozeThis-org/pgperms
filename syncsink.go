@@ -1,6 +1,7 @@
 package pgperms
 
 import (
+	"context"
 	"fmt"
 	"sort"
 )
@@ -54,4 +55,19 @@ func (r *Recorder) AddBarrier() {
 func (r *Recorder) Get() []QueryForDatabase {
 	r.AddBarrier()
 	return r.queries
+}
+
+func (r *Recorder) Apply(ctx context.Context, conns *Connections) error {
+	for _, q := range r.Get() {
+		db, deref, err := conns.Get(q.Database)
+		if err != nil {
+			return fmt.Errorf("failed to connect to database %q: %v", q.Database, err)
+		}
+		// We'll defer dereferencing until we're done with all queries. Otherwise we might reconnect repeatedly.
+		defer deref()
+		if _, err := db.Exec(ctx, q.Query); err != nil {
+			return fmt.Errorf("query %q on database %q failed: %v", q.Query, q.Database, err)
+		}
+	}
+	return nil
 }

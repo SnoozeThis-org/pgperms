@@ -11,6 +11,7 @@ import (
 	"github.com/SnoozeThis-org/pgperms"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jackc/pgx/v4"
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,7 +80,10 @@ func TestEndToEnd(t *testing.T) {
 				t.Fatalf("pgperms.Sync() failed: %v", err)
 			}
 			queries := rec.Get()
-			if diff := cmp.Diff(tc.Expected, queries); diff != "" {
+			strQueries := lo.Map(queries, func(q pgperms.QueryForDatabase, _ int) string {
+				return q.String()
+			})
+			if diff := cmp.Diff(tc.Expected, strQueries); diff != "" {
 				t.Errorf("Got (+) different queries than expected (-): %s", diff)
 			}
 
@@ -88,10 +92,8 @@ func TestEndToEnd(t *testing.T) {
 				// Disconnect so we can drop the database.
 				conns.DropCachedConnection(db)
 			}
-			for _, q := range queries {
-				if _, err := conn.Exec(ctx, q); err != nil {
-					t.Fatalf("Returned query %q failed: %v", q, err)
-				}
+			if err := rec.Apply(ctx, conns); err != nil {
+				t.Errorf("Failed to execute queries: %v", err)
 			}
 
 			if tc.NoSecondRun {

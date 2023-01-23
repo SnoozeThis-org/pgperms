@@ -84,14 +84,8 @@ func main() {
 		}
 		os.Exit(9)
 	}
-	for _, q := range rec.Get() {
-		db, _, err := conns.Get(q.Database)
-		if err != nil {
-			log.Fatalf("Failed to connect to database %q: %v", q.Database, err)
-		}
-		if _, err := db.Exec(ctx, q.Query); err != nil {
-			log.Fatalf("Query %q on database %q failed: %v", q.Query, q.Database, err)
-		}
+	if err := rec.Apply(ctx, conns); err != nil {
+		log.Fatalf("Failed to synchronize: %v", err)
 	}
 	conns.Close()
 }
