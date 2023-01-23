@@ -8,6 +8,8 @@ pgperms allows you to manage your PostgreSQL permissions in a configuration file
 go install github.com/SnoozeThis-org/pgperms/cmd/pgperms@latest
 ```
 
+or grab it from our [Releases](https://github.com/SnoozeThis-org/pgperms/releases/latest).
+
 ## Getting started
 
 If you already have an existing PostgreSQL cluster running, you can create pgperms config file from that database through:
