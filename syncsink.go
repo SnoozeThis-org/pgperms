@@ -16,32 +16,42 @@ type SyncSink interface {
 	AddBarrier()
 }
 
-// TODO: Separate streams for databases
-
 func NewRecorder() *Recorder {
 	return &Recorder{}
 }
 
 // Recorder is a SyncSink that simply records all the queries.
 type Recorder struct {
-	queries []string
+	queries []QueryForDatabase
 	barrier int
+}
+
+type QueryForDatabase struct {
+	Database string
+	Query    string
+}
+
+func (q QueryForDatabase) String() string {
+	return fmt.Sprintf("/* %24s */ %s", q.Database, q.Query)
 }
 
 var _ SyncSink = &Recorder{}
 
 // Query records that a query should happen.
 func (r *Recorder) Query(database, query string) {
-	r.queries = append(r.queries, fmt.Sprintf("/* %24s */ %s", database, query))
+	r.queries = append(r.queries, QueryForDatabase{database, query})
 }
 
 func (r *Recorder) AddBarrier() {
-	sort.Strings(r.queries[r.barrier:])
+	s := r.queries[r.barrier:]
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].Query < s[j].Query
+	})
 	r.barrier = len(r.queries)
 }
 
 // Get returns all queries recorded by this Recorder.
-func (r *Recorder) Get() []string {
-	sort.Strings(r.queries[r.barrier:])
+func (r *Recorder) Get() []QueryForDatabase {
+	r.AddBarrier()
 	return r.queries
 }

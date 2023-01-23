@@ -32,6 +32,9 @@ func NewConnections(ctx context.Context, primary *pgx.Conn) *Connections {
 // Get (or create) a connection to a specific database.
 // You need to call the returned function when done with the connection.
 func (c *Connections) Get(database string) (*pgx.Conn, func(), error) {
+	if database == "" {
+		return c.primary, func() {}, nil
+	}
 	deref := func() {
 		c.refcounts[database]--
 		if c.refcounts[database] == 0 && (database == "template0" || database == "template1") {

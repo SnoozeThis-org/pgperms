@@ -18,10 +18,16 @@ If you already have an existing PostgreSQL cluster running, you can create pgper
 $ pgperms --dump --user postgres --database=postgres > pgperms.yaml
 ```
 
-Then you can edit your config and bring PostgreSQL to the new desired state:
+Then you can edit your config and see what changes need to be made:
 
 ```shell
 $ pgperms --user postgres --database=postgres --config pgperms.yaml
+```
+
+And finally you can sync your config file to the database:
+
+```shell
+$ pgperms --user postgres --database=postgres --config pgperms.yaml --apply
 ```
 
 ## Managing roles
