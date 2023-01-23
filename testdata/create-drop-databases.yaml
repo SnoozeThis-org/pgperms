@@ -8,3 +8,4 @@ config:
 expected:
 - "/*                          */ CREATE DATABASE spawning"
 - "/*                          */ DROP DATABASE dying"
+no_second_run: true
