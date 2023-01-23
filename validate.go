@@ -108,8 +108,15 @@ func (v *validator) validatePrivileges(what string, privs []GenericPrivilege) {
 		}
 		for _, tgt := range p.untypedTargets() {
 			db, remaining := splitObjectName(tgt)
+			if db == "" {
+				db = remaining
+				remaining = ""
+			}
 			if db != "" && !lo.Contains(v.definedDatabases, db) {
 				v.addErrorf("%s: privilege specified for unmanaged database %q", src, db)
+			}
+			if remaining == "" {
+				continue
 			}
 			schema, remaining := splitObjectName(remaining)
 			if schema == "" {
