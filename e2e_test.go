@@ -48,7 +48,7 @@ func TestEndToEnd(t *testing.T) {
 			dec := yaml.NewDecoder(bytes.NewReader(b))
 			dec.KnownFields(true)
 			var tc TestCase
-			if err := yaml.Unmarshal(b, &tc); err != nil {
+			if err := dec.Decode(&tc); err != nil {
 				t.Fatalf("Failed to parse test case: %v", err)
 			}
 			if err := pgperms.ValidateConfig(tc.Config); err != nil {
