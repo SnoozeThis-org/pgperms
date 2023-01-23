@@ -8,16 +8,16 @@ import (
 	"github.com/samber/lo"
 )
 
-func expandTables(ctx context.Context, conns *Connections, privs []GenericPrivilege) ([]GenericPrivilege, error) {
-	return expandTablesOrSequences(ctx, conns, privs, false)
+func expandTables(ctx context.Context, conns *Connections, privs []GenericPrivilege, existingDatabases []string) ([]GenericPrivilege, error) {
+	return expandTablesOrSequences(ctx, conns, privs, existingDatabases, false)
 }
 
-func expandSequences(ctx context.Context, conns *Connections, privs []GenericPrivilege) ([]GenericPrivilege, error) {
-	return expandTablesOrSequences(ctx, conns, privs, true)
+func expandSequences(ctx context.Context, conns *Connections, privs []GenericPrivilege, existingDatabases []string) ([]GenericPrivilege, error) {
+	return expandTablesOrSequences(ctx, conns, privs, existingDatabases, true)
 }
 
 // expandTablesOrSequences resolves all permissions for .* to an actual list of tables.
-func expandTablesOrSequences(ctx context.Context, conns *Connections, privs []GenericPrivilege, sequences bool) ([]GenericPrivilege, error) {
+func expandTablesOrSequences(ctx context.Context, conns *Connections, privs []GenericPrivilege, existingDatabases []string, sequences bool) ([]GenericPrivilege, error) {
 	var d dfr.D
 	defer d.Run(nil)
 	interestingSchemas := map[string]map[string]struct{}{}
@@ -39,6 +39,9 @@ func expandTablesOrSequences(ctx context.Context, conns *Connections, privs []Ge
 	}
 	names := map[string]map[string][]string{}
 	for dbname, schemas := range interestingSchemas {
+		if !lo.Contains(existingDatabases, dbname) {
+			continue
+		}
 		conn, deref, err := conns.Get(dbname)
 		if err != nil {
 			return nil, err

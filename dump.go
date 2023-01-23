@@ -96,11 +96,11 @@ func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) 
 	if err != nil {
 		return err
 	}
-	d.TablePrivileges, err = expandTables(ctx, conns, d.TablePrivileges)
+	d.TablePrivileges, err = expandTables(ctx, conns, d.TablePrivileges, actual.Databases)
 	if err != nil {
 		return err
 	}
-	d.SequencePrivileges, err = expandSequences(ctx, conns, d.SequencePrivileges)
+	d.SequencePrivileges, err = expandSequences(ctx, conns, d.SequencePrivileges, actual.Databases)
 	if err != nil {
 		return err
 	}

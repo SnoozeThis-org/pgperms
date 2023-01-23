@@ -1,0 +1,12 @@
+config:
+  databases:
+    - spawning
+  schemas:
+    - spawning.spawning
+  table_privileges:
+    - roles: [postgres]
+      privileges: [SELECT]
+      tables: [spawning.spawning.*]
+expected:
+- "/*                          */ CREATE DATABASE spawning"
+- "/*                 spawning */ CREATE SCHEMA spawning"
