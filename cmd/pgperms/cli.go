@@ -14,10 +14,22 @@ import (
 
 var (
 	dump = pflag.Bool("dump", false, "Whether to dump the current permissions")
+	showVersion = pflag.Bool("version", false, "Dump the version and exit")
+
+	// Injected by releaser
+	version string
 )
 
 func main() {
 	pflag.Parse()
+	if *showVersion {
+		if version != "" {
+			fmt.Fprintf(os.Stderr, "pgperms version %s\n", version)
+		} else {
+			fmt.Fprintf(os.Stderr, "pgperms built without versioning information\n")
+		}
+		return
+	}
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, os.Getenv("DSN"))
 	if err != nil {

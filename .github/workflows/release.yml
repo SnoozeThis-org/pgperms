@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+
+    - run: mkdir _publish
+
+    - name: Build for linux/amd64
+      run: go build -v -ldflags "-X main.version=${{github.ref_name}}" -o _publish/pgperms-linux-amd64 ./cmd/pgperms/
+      env:
+        CGO_ENABLED: 0
+        GOARCH: amd64
+
+    - name: Build for linux/arm64
+      run: go build -v -ldflags "-X main.version=${{github.ref_name}}" -o _publish/pgperms-linux-arm64 ./cmd/pgperms/
+      env:
+        CGO_ENABLED: 0
+        GOARCH: arm64
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: _publish/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
