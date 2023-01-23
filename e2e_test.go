@@ -1,6 +1,7 @@
 package pgperms_test
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
 	"os"
@@ -43,9 +44,14 @@ func TestEndToEnd(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to read test case: %v", err)
 			}
+			dec := yaml.NewDecoder(bytes.NewReader(b))
+			dec.KnownFields(true)
 			var tc TestCase
 			if err := yaml.Unmarshal(b, &tc); err != nil {
 				t.Fatalf("Failed to parse test case: %v", err)
+			}
+			if err := pgperms.ValidateConfig(tc.Config); err != nil {
+				t.Fatalf("Failed to validate test case config: %v", err)
 			}
 
 			// 0. Check database emptiness
