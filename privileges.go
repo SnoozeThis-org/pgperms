@@ -325,7 +325,7 @@ func (ps privilegeSet) ListOrAll(objectType string) []string {
 	return l
 }
 
-func diffPrivileges(granting bool, oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, []GenericPrivilege) {
+func diffPrivileges(oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, []GenericPrivilege) {
 	existing := map[string]map[string]map[string]bool{}
 	for _, o := range oldPrivs {
 		for _, target := range o.untypedTargets() {
@@ -404,9 +404,9 @@ func applyPrivileges(ss SyncSink, database string, granting, justPrivs bool, dif
 }
 
 func SyncPrivileges(ss SyncSink, databases []string, actual, desired []GenericPrivilege) {
-	grant, grantPrivs := diffPrivileges(true, actual, desired)
+	grant, grantPrivs := diffPrivileges(actual, desired)
 	grant = append(grant, grantPrivs...)
-	revoke, revokePrivs := diffPrivileges(false, desired, actual)
+	revoke, revokePrivs := diffPrivileges(desired, actual)
 	for _, db := range databases {
 		// 1. Grant new privileges (possibly WITH GRANT OPTION)
 		applyPrivileges(ss, db, true, false, grant)
