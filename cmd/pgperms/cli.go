@@ -6,15 +6,25 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/SnoozeThis-org/pgperms"
+	"github.com/creachadair/getpass"
 	"github.com/jackc/pgx/v4"
 	"github.com/spf13/pflag"
 )
 
 var (
-	dump = pflag.Bool("dump", false, "Whether to dump the current permissions")
+	defaultConfig, _ = pgx.ParseConfig("")
+
+	config      = pflag.StringP("config", "c", "pgperms.yaml", "Path to the pgperms yaml config file")
+	dump        = pflag.Bool("dump", false, "Whether to dump the current permissions")
 	showVersion = pflag.Bool("version", false, "Dump the version and exit")
+	host        = pflag.StringP("host", "h", defaultConfig.Host, "database server host or socket directory")
+	port        = pflag.IntP("port", "P", int(defaultConfig.Port), "database server port")
+	username    = pflag.StringP("username", "U", defaultConfig.User, "database user name")
+	askPassword = pflag.BoolP("password", "W", false, "prompt for password")
+	database    = pflag.StringP("database", "d", "postgres", "database name for initial connection")
 
 	// Injected by releaser
 	version string
@@ -31,7 +41,15 @@ func main() {
 		return
 	}
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, os.Getenv("DSN"))
+	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s", escapeDSNString(*host), *port, escapeDSNString(*username), escapeDSNString(*database))
+	if *askPassword {
+		pass, err := getpass.Prompt("Password: ")
+		if err != nil {
+			log.Fatalf("Failed to read password from prompt: %v", err)
+		}
+		dsn += " password=" + escapeDSNString(pass)
+	}
+	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -43,9 +61,12 @@ func main() {
 		fmt.Println(ret)
 		return
 	}
-	desired, err := ioutil.ReadFile(pflag.Arg(0))
+	if *config == "" {
+		log.Fatalf("Unless --dump is specified, --config must be set")
+	}
+	desired, err := ioutil.ReadFile(*config)
 	if err != nil {
-		log.Fatalf("Failed to read from config file %q: %v", pflag.Arg(0), err)
+		log.Fatalf("Failed to read from config file %q: %v", *config, err)
 	}
 	rec := pgperms.NewRecorder()
 	if err := pgperms.Sync(ctx, pgperms.NewConnections(ctx, conn), desired, rec); err != nil {
@@ -54,4 +75,8 @@ func main() {
 	for _, q := range rec.Get() {
 		fmt.Println(q)
 	}
+}
+
+func escapeDSNString(s string) string {
+	return "'" + strings.ReplaceAll(strings.ReplaceAll(s, `\`, `\\`), `'`, `\'`) + "'"
 }

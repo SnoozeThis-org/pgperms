@@ -15,15 +15,13 @@ or grab it from our [Releases](https://github.com/SnoozeThis-org/pgperms/release
 If you already have an existing PostgreSQL cluster running, you can create pgperms config file from that database through:
 
 ```shell
-$ export DSN="host=localhost username=postgres dbname=postgres"
-$ pgperms --dump > myconfig.yaml
+$ pgperms --dump --user postgres --database=postgres > pgperms.yaml
 ```
 
 Then you can edit your config and bring PostgreSQL to the new desired state:
 
 ```shell
-$ export DSN="host=localhost username=postgres dbname=postgres"
-$ pgperms myconfig.yaml
+$ pgperms --user postgres --database=postgres --config pgperms.yaml
 ```
 
 ## Managing roles

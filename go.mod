@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/Jille/dfr v1.0.0
+	github.com/creachadair/getpass v0.2.1
 	github.com/google/go-cmp v0.5.8
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jackc/pgx/v4 v4.16.1
@@ -27,5 +28,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
