@@ -12,6 +12,7 @@ import (
 
 // TODO: A config setting to manage all users (and thus not need to tombstone them) would be nice.
 
+// RoleAttributes is a piece of configuration that describes which attributes a role should have.
 type RoleAttributes struct {
 	Superuser       bool       `yaml:"superuser,omitempty"`
 	CreateDB        bool       `yaml:"createdb,omitempty"`
@@ -48,6 +49,7 @@ func (r RoleAttributes) GetValidUntil() time.Time {
 	return *r.ValidUntil
 }
 
+// CreateSQL returns the SQL to create this role.
 func (r RoleAttributes) CreateSQL(username string) string {
 	q := "CREATE ROLE " + username
 	if r.Superuser {
@@ -83,6 +85,7 @@ func (r RoleAttributes) CreateSQL(username string) string {
 	return q
 }
 
+// FetchRoles returns all roles and their attributes from a running PostgreSQL cluster.
 func FetchRoles(ctx context.Context, conn *pgx.Conn) (map[string]RoleAttributes, error) {
 	rows, err := conn.Query(ctx, "SELECT rolname, rolpassword, rolsuper, rolinherit, rolcreaterole, rolcreatedb, rolcanlogin, rolreplication, rolbypassrls, rolconnlimit, rolvaliduntil FROM pg_catalog.pg_authid WHERE rolname NOT LIKE 'pg_%'")
 	if err != nil {
@@ -184,6 +187,7 @@ func alterRole(ss SyncSink, username string, o, n RoleAttributes) {
 	}
 }
 
+// SyncRoles tells the SyncSink which queries should be executed to get to the desired state.
 func SyncRoles(ss SyncSink, oldRoles, newRoles map[string]RoleAttributes, tombstoned []string) {
 	for _, t := range tombstoned {
 		if _, found := oldRoles[t]; found {

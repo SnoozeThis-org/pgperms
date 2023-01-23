@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// fetchDatabases returns a list of databases existing in the cluster.
 func fetchDatabases(ctx context.Context, conn *pgx.Conn) ([]string, error) {
 	rows, err := conn.Query(ctx, "SELECT datname FROM pg_catalog.pg_database WHERE datallowconn")
 	if err != nil {
@@ -23,6 +24,7 @@ func fetchDatabases(ctx context.Context, conn *pgx.Conn) ([]string, error) {
 	return names, nil
 }
 
+// fetchSchemas returns a list of schemas existing in the database. The given connections need to be connected to the matching database.
 func fetchSchemas(ctx context.Context, conn *pgx.Conn, database string) ([]string, error) {
 	rows, err := conn.Query(ctx, "SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') AND nspname NOT LIKE 'pg_temp_%' AND nspname NOT LIKE 'pg_toast_temp_%'")
 	if err != nil {
@@ -44,6 +46,7 @@ func joinSchemaName(database, schema string) string {
 	return database + "." + safeIdentifier(schema)
 }
 
+// SyncDatabases tells the SyncSink which queries should be executed to create/delete the databases.
 func SyncDatabases(ss SyncSink, wanted, tombstoned, actual []string) {
 	a := map[string]struct{}{}
 	for _, d := range actual {
@@ -63,6 +66,7 @@ func SyncDatabases(ss SyncSink, wanted, tombstoned, actual []string) {
 	}
 }
 
+// SyncSchemas tells the SyncSink which queries should be executed to create/delete the schemas.
 func SyncSchemas(ss SyncSink, wanted, tombstoned, actual []string) {
 	a := map[string]struct{}{}
 	for _, s := range actual {

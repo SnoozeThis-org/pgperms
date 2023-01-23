@@ -21,6 +21,7 @@ type validator struct {
 	errors []string
 }
 
+// ValidateConfig checks whether the given config is correct.
 func ValidateConfig(c *Config) error {
 	v := validator{
 		tombstonedRoles:     c.TombstonedRoles,

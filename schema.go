@@ -1,5 +1,6 @@
 package pgperms
 
+// Config is the YAML format.
 type Config struct {
 	IgnoreSuperuserGrants *bool `yaml:"ignore_superuser_grants,omitempty"`
 

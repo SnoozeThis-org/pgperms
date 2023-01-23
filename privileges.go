@@ -45,6 +45,7 @@ var shortPrivs = map[string]string{
 	"USAGE":      "U",
 }
 
+// GenericPrivilege is a set of privileges for a set of roles on a set of targets.
 type GenericPrivilege struct {
 	Roles      []string `yaml:"roles,flow"`
 	Privileges []string `yaml:"privileges,flow"`
@@ -325,6 +326,8 @@ func (ps privilegeSet) ListOrAll(objectType string) []string {
 	return l
 }
 
+// diffPrivileges returns one set of privileges that should be granted and one that should be granted WITH GRANT OPTION.
+// It can also be called to calculate privileges to be revoked.
 func diffPrivileges(oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, []GenericPrivilege) {
 	existing := map[string]map[string]map[string]bool{}
 	for _, o := range oldPrivs {
@@ -369,6 +372,7 @@ func diffPrivileges(oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, 
 	return privs, grantPrivs
 }
 
+// applyPrivileges tells the SyncSink which queries should be executed to grant/revoke the given privileges.
 func applyPrivileges(ss SyncSink, database string, granting, justPrivs bool, diff []GenericPrivilege) {
 	if len(diff) == 0 {
 		return
@@ -403,6 +407,7 @@ func applyPrivileges(ss SyncSink, database string, granting, justPrivs bool, dif
 	}
 }
 
+// SyncPrivileges tells the SyncSink which queries to execute to get towards the desired privileges.
 func SyncPrivileges(ss SyncSink, databases []string, actual, desired []GenericPrivilege) {
 	grant, grantPrivs := diffPrivileges(actual, desired)
 	grant = append(grant, grantPrivs...)

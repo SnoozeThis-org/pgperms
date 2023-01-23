@@ -18,6 +18,7 @@ import (
 
 var scramRe = regexp.MustCompile(`^SCRAM-(SHA-1|SHA-256|SHA-512)\$(\d+):([^$]+)\$([^:]+):(.+)$`)
 
+// verifyPassword returns whether the hashed password belongs to the given user and password.
 func verifyPassword(hashed, username, plain string) bool {
 	if hashed == plain {
 		return true

@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Dump all permissions from a running cluster and return a config yaml.
 func Dump(ctx context.Context, conns *Connections) (string, error) {
 	c, err := Gather(ctx, conns, nil, nil)
 	if err != nil {
@@ -25,6 +26,7 @@ func Dump(ctx context.Context, conns *Connections) (string, error) {
 	return string(b), nil
 }
 
+// Gather all permissions from a running cluster.
 func Gather(ctx context.Context, conns *Connections, interestingRoles, interestingDatabases []string) (*Config, error) {
 	var d dfr.D
 	defer d.Run(nil)
@@ -78,6 +80,8 @@ func Gather(ctx context.Context, conns *Connections, interestingRoles, interesti
 	return &ret, nil
 }
 
+// Sync the desired configuration to a running cluster.
+// Queries to be executed are sent to the SyncSink, not executed on the given connections.
 func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) error {
 	dec := yaml.NewDecoder(bytes.NewReader(desired))
 	dec.KnownFields(true)

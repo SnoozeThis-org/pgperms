@@ -22,6 +22,7 @@ func NewRecorder() *Recorder {
 	return &Recorder{}
 }
 
+// Recorder is a SyncSink that simply records all the queries.
 type Recorder struct {
 	queries []string
 	barrier int
@@ -29,6 +30,7 @@ type Recorder struct {
 
 var _ SyncSink = &Recorder{}
 
+// Query records that a query should happen.
 func (r *Recorder) Query(database, query string) {
 	r.queries = append(r.queries, fmt.Sprintf("/* %24s */ %s", database, query))
 }
@@ -38,6 +40,7 @@ func (r *Recorder) AddBarrier() {
 	r.barrier = len(r.queries)
 }
 
+// Get returns all queries recorded by this Recorder.
 func (r *Recorder) Get() []string {
 	sort.Strings(r.queries[r.barrier:])
 	return r.queries

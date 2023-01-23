@@ -12,6 +12,8 @@ import (
 
 // TODO: Write test
 
+// Escape a string for use in a query.
+// I don't fully guarantee this is correct, but it'll probably do for strings from the configuration.
 func Escape(s string) string {
 	encodingType := ""
 	var buf bytes.Buffer

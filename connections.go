@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// Connections is a set of connections to the same cluster, but connected to different databases.
 type Connections struct {
 	ctx         context.Context
 	primary     *pgx.Conn
@@ -14,6 +15,8 @@ type Connections struct {
 	refcounts   map[string]int
 }
 
+// NewConnections creates a new set of connections, starting with given connection as the primary connection.
+// Other connections will be made based on its config.
 func NewConnections(ctx context.Context, primary *pgx.Conn) *Connections {
 	c := primary.Config()
 	return &Connections{
@@ -26,6 +29,8 @@ func NewConnections(ctx context.Context, primary *pgx.Conn) *Connections {
 	}
 }
 
+// Get (or create) a connection to a specific database.
+// You need to call the returned function when done with the connection.
 func (c *Connections) Get(database string) (*pgx.Conn, func(), error) {
 	deref := func() {
 		c.refcounts[database]--
@@ -49,6 +54,7 @@ func (c *Connections) Get(database string) (*pgx.Conn, func(), error) {
 	return dbconn, deref, nil
 }
 
+// DropCachedConnection disconnects from the given database name if needed.
 func (c *Connections) DropCachedConnection(database string) {
 	conn, ok := c.perDatabase[database]
 	if !ok {
@@ -62,6 +68,7 @@ func (c *Connections) DropCachedConnection(database string) {
 	delete(c.refcounts, database)
 }
 
+// Close all connections except for the primary.
 func (c *Connections) Close() {
 	for name, conn := range c.perDatabase {
 		if c.primary == conn {
