@@ -126,10 +126,10 @@ You can use `*` as the sequences name to imply all sequences in a schema.
 
 ```yaml
 sequence_privileges:
-    - roles: [rolegroup]
-      privileges: [SELECT, UPDATE, USAGE]
-      sequences:
-        - mydatabase.otherschema.*
+  - roles: [rolegroup]
+    privileges: [SELECT, UPDATE, USAGE]
+    sequences:
+      - mydatabase.otherschema.*
 ```
 
 ## Contributions
