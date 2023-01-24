@@ -136,7 +136,6 @@ sequence_privileges:
 
 We'll happily accept your contributions! There's still a lot of things not supported:
 
-- Automatically execute the needed queries on the cluster.
 - Permissions on columns, domains, foreign data wrappers, foreign servers, routines, languages, large objects, tablespaces or types.
 - If plain-text passwords are stored in the config file, they're sent to PostgreSQL in plain-text as well. It would be nicer to encrypt passwords locally.
 - Set up default privileges so that newly created tables already have the correct permissions without having to run pgperms?
