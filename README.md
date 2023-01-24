@@ -12,22 +12,22 @@ or grab it from our [Releases](https://github.com/SnoozeThis-org/pgperms/release
 
 ## Getting started
 
-If you already have an existing PostgreSQL cluster running, you can create pgperms config file from that database through:
+If you already have an existing PostgreSQL cluster running, you can create pgperms config file from that cluster through:
 
 ```shell
-$ pgperms --dump --user postgres --database=postgres > pgperms.yaml
+$ pgperms --dump --user postgres > pgperms.yaml
 ```
 
 Then you can edit your config and see what changes need to be made:
 
 ```shell
-$ pgperms --user postgres --database=postgres --config pgperms.yaml
+$ pgperms --user postgres --config pgperms.yaml
 ```
 
-And finally you can sync your config file to the database:
+And finally you can sync your config file to the cluster:
 
 ```shell
-$ pgperms --user postgres --database=postgres --config pgperms.yaml --apply
+$ pgperms --user postgres --config pgperms.yaml --apply
 ```
 
 ## Managing roles
