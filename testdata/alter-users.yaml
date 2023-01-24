@@ -1,4 +1,5 @@
 preparation:
+  - SET password_encryption TO 'md5'
   - CREATE ROLE orphan LOGIN
   - CREATE ROLE superman CREATEDB LOGIN
   - CREATE ROLE replication LOGIN REPLICATION
@@ -24,5 +25,5 @@ config:
 expected:
 - "/*                          */ ALTER ROLE orphan NOINHERIT"
 - "/*                          */ ALTER ROLE replication CONNECTION LIMIT 5"
-- "/*                          */ ALTER ROLE someuser PASSWORD 'hackme' VALID UNTIL '2000-01-01T13:00:00Z' LOGIN"
+- "/*                          */ ALTER ROLE someuser PASSWORD 'md50157c149a37c410a5595f1cba1b0ab9c' VALID UNTIL '2000-01-01T13:00:00Z' LOGIN"
 - "/*                          */ ALTER ROLE superman SUPERUSER CREATEROLE BYPASSRLS"

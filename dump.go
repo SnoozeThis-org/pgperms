@@ -3,6 +3,7 @@ package pgperms
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	"github.com/Jille/dfr"
 	"github.com/samber/lo"
@@ -103,6 +104,9 @@ func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) 
 	d.SequencePrivileges, err = expandSequences(ctx, conns, d.SequencePrivileges, actual.Databases)
 	if err != nil {
 		return err
+	}
+	if err := encryptPasswordsInConfig(ctx, conns.primary, d.Roles); err != nil {
+		return fmt.Errorf("failed to encrypt plain-text passwords in the config: %v", err)
 	}
 
 	SyncDatabases(ss, d.Databases, d.TombstonedDatabases, actual.Databases)

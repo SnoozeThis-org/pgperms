@@ -25,6 +25,9 @@ type RoleAttributes struct {
 	Password        *string    `yaml:"password,omitempty"`
 	ValidUntil      *time.Time `yaml:"validuntil,omitempty"`
 	MemberOf        []string   `yaml:"member_of,omitempty"`
+
+	// hashedPassword is precalculated (to fail early on) before syncing roles. If Password is already hashed, this'll be empty.
+	hashedPassword string
 }
 
 func (r RoleAttributes) GetInherit() bool {
@@ -77,7 +80,10 @@ func (r RoleAttributes) CreateSQL(username string) string {
 		q += fmt.Sprintf(" CONNECTION LIMIT %d", *r.ConnectionLimit)
 	}
 	if r.Password != nil && *r.Password != "" {
-		q += " PASSWORD " + Escape(*r.Password)
+		if r.hashedPassword == "" {
+			r.hashedPassword = *r.Password
+		}
+		q += " PASSWORD " + Escape(r.hashedPassword)
 	}
 	if r.ValidUntil != nil {
 		q += " VALID UNTIL " + Escape(r.ValidUntil.Format("2006-01-02T15:04:05Z"))
@@ -144,7 +150,10 @@ func alterRole(ss SyncSink, username string, o, n RoleAttributes) {
 			}
 		} else {
 			if !verifyPassword(*o.Password, username, *n.Password) {
-				q += " PASSWORD " + Escape(*n.Password)
+				if n.hashedPassword == "" {
+					n.hashedPassword = *n.Password
+				}
+				q += " PASSWORD " + Escape(n.hashedPassword)
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+preparation:
+  - SET password_encryption TO 'md5'
 config:
   roles:
     someuser:
@@ -19,5 +21,5 @@ expected:
 - "/*                          */ CREATE ROLE orphan NOINHERIT LOGIN"
 - "/*                          */ CREATE ROLE replication LOGIN REPLICATION CONNECTION LIMIT 5"
 - "/*                          */ CREATE ROLE somerole"
-- "/*                          */ CREATE ROLE someuser LOGIN PASSWORD 'hackme' VALID UNTIL '2000-01-01T13:00:00Z'"
+- "/*                          */ CREATE ROLE someuser LOGIN PASSWORD 'md50157c149a37c410a5595f1cba1b0ab9c' VALID UNTIL '2000-01-01T13:00:00Z'"
 - "/*                          */ CREATE ROLE superman SUPERUSER CREATEDB CREATEROLE LOGIN BYPASSRLS"

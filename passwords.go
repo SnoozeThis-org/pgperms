@@ -2,31 +2,35 @@ package pgperms
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/md5"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
+	"io"
 	"regexp"
 	"strconv"
-	"strings"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/xdg-go/pbkdf2"
 	"github.com/xdg-go/scram"
 )
 
-// TODO: Use `SELECT setting FROM pg_settings WHERE name='password_encryption'` and only send encrypted passwords.
-
-var scramRe = regexp.MustCompile(`^SCRAM-(SHA-1|SHA-256|SHA-512)\$(\d+):([^$]+)\$([^:]+):(.+)$`)
+var (
+	md5Re   = regexp.MustCompile(`^md5[0-9a-f]{32}$`)
+	scramRe = regexp.MustCompile(`^SCRAM-(SHA-1|SHA-256|SHA-512)\$(\d+):([^$]+)\$([^:]+):(.+)$`)
+)
 
 // verifyPassword returns whether the hashed password belongs to the given user and password.
 func verifyPassword(hashed, username, plain string) bool {
 	if hashed == plain {
 		return true
 	}
-	if strings.HasPrefix(hashed, "md5") {
-		b := md5.Sum([]byte(plain + username))
-		h := hex.EncodeToString(b[:])
-		return h == hashed[3:]
+	if md5Re.MatchString(hashed) {
+		return hashed == MD5Password(username, plain)
 	}
 	if m := scramRe.FindStringSubmatch(hashed); m != nil {
 		hgf := getScramHash(m[1])
@@ -126,4 +130,73 @@ func getSum(hgf scram.HashGeneratorFcn, key []byte) []byte {
 	h := hgf()
 	_, _ = h.Write(key)
 	return h.Sum(nil)
+}
+
+type PasswordHasher func(username, password string) (string, error)
+
+func SelectPasswordHasher(ctx context.Context, conn *pgx.Conn) (PasswordHasher, error) {
+	var method string
+	if err := conn.QueryRow(ctx, "SELECT setting FROM pg_settings WHERE name='password_encryption'").Scan(&method); err != nil {
+		return nil, err
+	}
+	switch method {
+	case "scram-sha-256":
+		return func(username, password string) (string, error) {
+			return ScramSha256Password(password)
+		}, nil
+	case "md5":
+		return func(username, password string) (string, error) {
+			return MD5Password(username, password), nil
+		}, nil
+	default:
+		return nil, fmt.Errorf("unknown password_encryption %q. File a feature request at https://github.com/SnoozeThis-org/pgperms/issues or don't use plaintext passwords in the config file", method)
+	}
+}
+
+func MD5Password(username, password string) string {
+	b := md5.Sum([]byte(password + username))
+	return "md5" + hex.EncodeToString(b[:])
+}
+
+func ScramSha256Password(password string) (string, error) {
+	const iterationCnt = 4096
+	const keyLen = 32
+	salt := make([]byte, 16)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return "", err
+	}
+	digestKey := pbkdf2.Key([]byte(password), salt, iterationCnt, keyLen, sha256.New)
+	clientKey := getHMACSum(scram.SHA256, digestKey, []byte("Client Key"))
+	storedKey := getSum(scram.SHA256, clientKey)
+	serverKey := getHMACSum(scram.SHA256, digestKey, []byte("Server Key"))
+
+	return fmt.Sprintf("SCRAM-SHA-256$%d:%s$%s:%s",
+		iterationCnt,
+		base64.StdEncoding.EncodeToString(salt),
+		base64.StdEncoding.EncodeToString(storedKey),
+		base64.StdEncoding.EncodeToString(serverKey),
+	), nil
+}
+
+func encryptPasswordsInConfig(ctx context.Context, conn *pgx.Conn, roles map[string]RoleAttributes) error {
+	var hasher PasswordHasher
+	for r, ra := range roles {
+		if ra.Password == nil || md5Re.MatchString(*ra.Password) || scramRe.MatchString(*ra.Password) {
+			continue
+		}
+		if hasher == nil {
+			var err error
+			hasher, err = SelectPasswordHasher(ctx, conn)
+			if err != nil {
+				return err
+			}
+		}
+		hash, err := hasher(r, *ra.Password)
+		if err != nil {
+			return err
+		}
+		ra.hashedPassword = hash
+		roles[r] = ra
+	}
+	return nil
 }

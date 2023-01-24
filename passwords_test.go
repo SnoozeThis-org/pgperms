@@ -19,6 +19,12 @@ func TestPasswords(t *testing.T) {
 			want:     true,
 		},
 		{
+			username: "someuser",
+			plain:    "somepassword",
+			hashed:   "md5036f87626dc9bdf7b4b353ecca2556d0",
+			want:     true,
+		},
+		{
 			username: "quis",
 			plain:    "SCRAM-SHA-256$4096:R1uviLmvs+9Ap6DAS1WOnQ==$mxR4jEPmRr3wePTVxZYB98KyS+mfZ9Jv0AMXbTDBTmk=:SXj6NmnPJFTuN5HLoGowDacCwKj4XmemeQYXEcsPye4=",
 			hashed:   "SCRAM-SHA-256$4096:R1uviLmvs+9Ap6DAS1WOnQ==$mxR4jEPmRr3wePTVxZYB98KyS+mfZ9Jv0AMXbTDBTmk=:SXj6NmnPJFTuN5HLoGowDacCwKj4XmemeQYXEcsPye4=",
@@ -60,5 +66,15 @@ func TestPasswords(t *testing.T) {
 				t.Errorf("verifyPassword(%q, %q, %q): %v; want %v", tc.hashed, tc.username, tc.plain, got, tc.want)
 			}
 		})
+	}
+}
+
+func TestScramEncryption(t *testing.T) {
+	hash, err := ScramSha256Password("hackme")
+	if err != nil {
+		t.Fatalf("Failed to encrypt password: %v", err)
+	}
+	if !verifyPassword(hash, "username", "hackme") {
+		t.Fatalf("Encrypted password didn't verify: %v", err)
 	}
 }
