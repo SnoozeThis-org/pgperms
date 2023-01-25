@@ -16,7 +16,6 @@ type Config struct {
 	TablePrivileges    []GenericPrivilege `yaml:"table_privileges,omitempty"`
 	SequencePrivileges []GenericPrivilege `yaml:"sequence_privileges,omitempty"`
 	// ColumnPrivileges             []GenericPrivilege `yaml:"column_privileges,omitempty"`
-	// DomainPrivileges             []GenericPrivilege `yaml:"domain_privileges,omitempty"`
 	// ForeignDataWrapperPrivileges []GenericPrivilege `yaml:"foreign_data_wrapper_privileges,omitempty"`
 	// ForeignServerPrivileges      []GenericPrivilege `yaml:"foreign_server_privileges,omitempty"`
 	// RoutinePrivileges            []GenericPrivilege `yaml:"routine_privileges,omitempty"`
