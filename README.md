@@ -138,7 +138,7 @@ sequence_privileges:
 
 We'll happily accept your contributions! There's still a lot of things not supported:
 
-- Permissions on columns, domains, foreign data wrappers, foreign servers, routines, languages, large objects, tablespaces or types.
+- Permissions on columns, domains, foreign data wrappers, foreign servers, routines, languages, large objects or tablespaces.
 - Set up default privileges so that newly created tables already have the correct permissions without having to run pgperms?
 - A config setting to automatically manage all users (and thus delete any unlisted users without needing to tombstone them).
 - More test cases

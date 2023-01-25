@@ -294,6 +294,46 @@ func fetchSchemasPrivileges(ctx context.Context, conn *pgx.Conn, database string
 	return privs, nil
 }
 
+func fetchTypePrivileges(ctx context.Context, conn *pgx.Conn, database string, interestingUsers []string) ([]GenericPrivilege, error) {
+	rows, err := conn.Query(ctx, "SELECT nspname, typname, pg_get_userbyid(grantee) AS grantee, privilege_type, is_grantable FROM pg_catalog.pg_type, pg_namespace, aclexplode(typacl) WHERE pg_namespace.oid = typnamespace AND nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') AND pg_get_userbyid(grantee) = ANY($1)", interestingUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	grouped := map[string]map[string]map[bool]privilegeSet{}
+	for rows.Next() {
+		var schema, typ, grantee, privilege string
+		var grantable bool
+		if err := rows.Scan(&schema, &typ, &grantee, &privilege, &grantable); err != nil {
+			return nil, err
+		}
+		fqtn := joinTableName(database, schema, typ)
+		if grouped[grantee][fqtn] == nil {
+			if grouped[grantee] == nil {
+				grouped[grantee] = map[string]map[bool]privilegeSet{}
+			}
+			grouped[grantee][fqtn] = map[bool]privilegeSet{}
+		}
+		ps := grouped[grantee][fqtn][grantable]
+		ps.Add(privilege)
+		grouped[grantee][fqtn][grantable] = ps
+	}
+	var privs []GenericPrivilege
+	for grantee, tmp1 := range grouped {
+		for fqtn, tmp2 := range tmp1 {
+			for grantable, ps := range tmp2 {
+				privs = append(privs, GenericPrivilege{
+					Roles:      []string{grantee},
+					Types:    []string{fqtn},
+					Privileges: ps.ListOrAll("types"),
+					Grantable:  grantable,
+				})
+			}
+		}
+	}
+	return privs, nil
+}
+
 type privilegeSet int
 
 func (ps *privilegeSet) Add(priv string) {

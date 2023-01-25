@@ -20,6 +20,7 @@ func Dump(ctx context.Context, conns *Connections) (string, error) {
 	c.SequencePrivileges = mergePrivileges(c.SequencePrivileges)
 	c.DatabasePrivileges = mergePrivileges(c.DatabasePrivileges)
 	c.SchemaPrivileges = mergePrivileges(c.SchemaPrivileges)
+	c.TypePrivileges = mergePrivileges(c.TypePrivileges)
 	b, err := yaml.Marshal(c)
 	if err != nil {
 		return "", err
@@ -76,6 +77,12 @@ func Gather(ctx context.Context, conns *Connections, interestingRoles, interesti
 		ret.TablePrivileges = append(ret.TablePrivileges, tblPrivs...)
 		ret.SequencePrivileges = append(ret.SequencePrivileges, seqPrivs...)
 
+		typPrivs, err := fetchTypePrivileges(ctx, dbconn, dbname, interestingRoles)
+		if err != nil {
+			return nil, err
+		}
+		ret.TypePrivileges = append(ret.TypePrivileges, typPrivs...)
+
 		derefNow(true)
 	}
 	return &ret, nil
@@ -118,6 +125,8 @@ func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) 
 	SyncSchemas(ss, d.Schemas, d.TombstonedSchemas, actual.Schemas)
 	ss.AddBarrier()
 	SyncPrivileges(ss, d.Databases, actual.SchemaPrivileges, d.SchemaPrivileges)
+	ss.AddBarrier()
+	SyncPrivileges(ss, d.Databases, actual.TypePrivileges, d.TypePrivileges)
 	ss.AddBarrier()
 	SyncPrivileges(ss, d.Databases, actual.TablePrivileges, d.TablePrivileges)
 	ss.AddBarrier()
