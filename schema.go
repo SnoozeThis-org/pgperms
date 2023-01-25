@@ -19,7 +19,7 @@ type Config struct {
 	// ForeignDataWrapperPrivileges []GenericPrivilege `yaml:"foreign_data_wrapper_privileges,omitempty"`
 	// ForeignServerPrivileges      []GenericPrivilege `yaml:"foreign_server_privileges,omitempty"`
 	// RoutinePrivileges            []GenericPrivilege `yaml:"routine_privileges,omitempty"`
-	// LanguagePrivileges           []GenericPrivilege `yaml:"language_privileges,omitempty"`
+	LanguagePrivileges []GenericPrivilege `yaml:"language_privileges,omitempty"`
 	// LargeObjectPrivileges        []GenericPrivilege `yaml:"large_object_privileges,omitempty"`
 	// TablespacePrivileges         []GenericPrivilege `yaml:"tablespace_privileges,omitempty"`
 	TypePrivileges []GenericPrivilege `yaml:"type_privileges,omitempty"`

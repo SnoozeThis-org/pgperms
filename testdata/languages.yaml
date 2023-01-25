@@ -1,0 +1,10 @@
+preparation:
+  - CREATE USER someone
+  - GRANT USAGE ON LANGUAGE plpgsql TO someone
+config:
+  roles:
+    someone:
+  databases:
+    - postgres
+expected:
+- "/*                 postgres */ REVOKE USAGE ON LANGUAGE plpgsql FROM someone"

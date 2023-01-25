@@ -334,6 +334,46 @@ func fetchTypePrivileges(ctx context.Context, conn *pgx.Conn, database string, i
 	return privs, nil
 }
 
+func fetchLanguagePrivileges(ctx context.Context, conn *pgx.Conn, database string, interestingUsers []string) ([]GenericPrivilege, error) {
+	rows, err := conn.Query(ctx, "SELECT lanname, pg_get_userbyid(grantee) AS grantee, privilege_type, is_grantable FROM pg_catalog.pg_language, aclexplode(lanacl) WHERE pg_get_userbyid(grantee) = ANY($1)", interestingUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	grouped := map[string]map[string]map[bool]privilegeSet{}
+	for rows.Next() {
+		var lang, grantee, privilege string
+		var grantable bool
+		if err := rows.Scan(&lang, &grantee, &privilege, &grantable); err != nil {
+			return nil, err
+		}
+		fqln := joinSchemaName(database, lang)
+		if grouped[grantee][fqln] == nil {
+			if grouped[grantee] == nil {
+				grouped[grantee] = map[string]map[bool]privilegeSet{}
+			}
+			grouped[grantee][fqln] = map[bool]privilegeSet{}
+		}
+		ps := grouped[grantee][fqln][grantable]
+		ps.Add(privilege)
+		grouped[grantee][fqln][grantable] = ps
+	}
+	var privs []GenericPrivilege
+	for grantee, tmp1 := range grouped {
+		for fqln, tmp2 := range tmp1 {
+			for grantable, ps := range tmp2 {
+				privs = append(privs, GenericPrivilege{
+					Roles:      []string{grantee},
+					Languages:  []string{fqln},
+					Privileges: ps.ListOrAll("languages"),
+					Grantable:  grantable,
+				})
+			}
+		}
+	}
+	return privs, nil
+}
+
 type privilegeSet int
 
 func (ps *privilegeSet) Add(priv string) {

@@ -21,6 +21,7 @@ func Dump(ctx context.Context, conns *Connections) (string, error) {
 	c.DatabasePrivileges = mergePrivileges(c.DatabasePrivileges)
 	c.SchemaPrivileges = mergePrivileges(c.SchemaPrivileges)
 	c.TypePrivileges = mergePrivileges(c.TypePrivileges)
+	c.LanguagePrivileges = mergePrivileges(c.LanguagePrivileges)
 	b, err := yaml.Marshal(c)
 	if err != nil {
 		return "", err
@@ -83,6 +84,12 @@ func Gather(ctx context.Context, conns *Connections, interestingRoles, interesti
 		}
 		ret.TypePrivileges = append(ret.TypePrivileges, typPrivs...)
 
+		langPrivs, err := fetchLanguagePrivileges(ctx, dbconn, dbname, interestingRoles)
+		if err != nil {
+			return nil, err
+		}
+		ret.LanguagePrivileges = append(ret.LanguagePrivileges, langPrivs...)
+
 		derefNow(true)
 	}
 	return &ret, nil
@@ -131,5 +138,7 @@ func Sync(ctx context.Context, conns *Connections, desired []byte, ss SyncSink) 
 	SyncPrivileges(ss, d.Databases, actual.TablePrivileges, d.TablePrivileges)
 	ss.AddBarrier()
 	SyncPrivileges(ss, d.Databases, actual.SequencePrivileges, d.SequencePrivileges)
+	ss.AddBarrier()
+	SyncPrivileges(ss, d.Databases, actual.LanguagePrivileges, d.LanguagePrivileges)
 	return nil
 }
