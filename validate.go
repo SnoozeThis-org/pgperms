@@ -103,7 +103,9 @@ func (v *validator) validatePrivileges(what string, privs []GenericPrivilege) {
 		if what != t[0] {
 			v.addErrorf("%s: privilege has wrong target field (want %q, got %q)", src, what, t[0])
 		}
-		if unknown := stringlib.Diff(p.Privileges, validPrivileges[what]); len(unknown) > 0 {
+		if len(p.Privileges) == 1 && p.Privileges[0] == "ALL PRIVILEGES" {
+			// OK
+		} else if unknown := stringlib.Diff(p.Privileges, validPrivileges[what]); len(unknown) > 0 {
 			v.addErrorf("%s: privilege has invalid privileges %v for %s_privileges", src, unknown, what[:len(what)-1])
 		}
 		for _, tgt := range p.untypedTargets() {

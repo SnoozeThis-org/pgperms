@@ -11,6 +11,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jackc/pgx/v4"
 	"github.com/samber/lo"
+	"golang.org/x/exp/slices"
 )
 
 var validPrivileges = map[string][]string{
@@ -121,6 +122,13 @@ func (gp GenericPrivilege) untypedTargets() []string {
 	return nil
 }
 
+func (gp GenericPrivilege) expandPrivileges() []string {
+	if slices.Contains(gp.Privileges, "ALL PRIVILEGES") {
+		return validPrivileges[gp.targets()[0]]
+	}
+	return gp.Privileges
+}
+
 func (gp *GenericPrivilege) set(what string, v []string) {
 	switch what {
 	case "tables":
@@ -190,14 +198,14 @@ func fetchTablePrivileges(ctx context.Context, conn *pgx.Conn, database string, 
 					tables = append(tables, GenericPrivilege{
 						Roles:      []string{grantee},
 						Tables:     []string{fqtn},
-						Privileges: ps.List(),
+						Privileges: ps.ListOrAll("tables"),
 						Grantable:  grantable,
 					})
 				case 'S':
 					sequences = append(sequences, GenericPrivilege{
 						Roles:      []string{grantee},
 						Sequences:  []string{fqtn},
-						Privileges: ps.List(),
+						Privileges: ps.ListOrAll("sequences"),
 						Grantable:  grantable,
 					})
 				}
@@ -237,7 +245,7 @@ func fetchDatabasesPrivileges(ctx context.Context, conn *pgx.Conn, interestingUs
 				privs = append(privs, GenericPrivilege{
 					Roles:      []string{grantee},
 					Databases:  []string{database},
-					Privileges: ps.List(),
+					Privileges: ps.ListOrAll("databases"),
 					Grantable:  grantable,
 				})
 			}
@@ -277,7 +285,7 @@ func fetchSchemasPrivileges(ctx context.Context, conn *pgx.Conn, database string
 				privs = append(privs, GenericPrivilege{
 					Roles:      []string{grantee},
 					Schemas:    []string{fqsn},
-					Privileges: ps.List(),
+					Privileges: ps.ListOrAll("schemas"),
 					Grantable:  grantable,
 				})
 			}
@@ -291,8 +299,7 @@ type privilegeSet int
 func (ps *privilegeSet) Add(priv string) {
 	i := lo.IndexOf(allPrivs, priv)
 	if i == -1 {
-		// Unknown privilege? Ignore
-		return
+		panic(fmt.Errorf("BUG: Unknown privilege %q", priv))
 	}
 	*ps = (*ps) | (1 << i)
 }
@@ -320,7 +327,6 @@ func (ps privilegeSet) List() []string {
 func (ps privilegeSet) ListOrAll(objectType string) []string {
 	l := ps.List()
 	if len(l) > 1 && lo.Every(l, validPrivileges[objectType]) {
-		// TODO: Support ALL PRIVILEGES when parsing the config file
 		return []string{"ALL PRIVILEGES"}
 	}
 	return l
@@ -339,7 +345,7 @@ func diffPrivileges(oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, 
 				if existing[target][grantee] == nil {
 					existing[target][grantee] = map[string]bool{}
 				}
-				for _, priv := range o.Privileges {
+				for _, priv := range o.expandPrivileges() {
 					existing[target][grantee][priv] = o.Grantable
 				}
 			}
@@ -349,7 +355,7 @@ func diffPrivileges(oldPrivs, newPrivs []GenericPrivilege) ([]GenericPrivilege, 
 	for _, n := range newPrivs {
 		for _, target := range n.untypedTargets() {
 			for _, grantee := range n.Roles {
-				for _, priv := range n.Privileges {
+				for _, priv := range n.expandPrivileges() {
 					withGrant, found := existing[target][grantee][priv]
 					if found && (withGrant || !n.Grantable) {
 						continue

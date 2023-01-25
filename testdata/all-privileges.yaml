@@ -1,0 +1,36 @@
+preparation:
+  - CREATE TABLE abc (id SERIAL)
+  - CREATE TABLE def (id SERIAL)
+  - CREATE TABLE ghi (id SERIAL)
+  - CREATE TABLE jkl (id SERIAL)
+  - CREATE TABLE mno (id SERIAL)
+  - CREATE USER someone
+  - GRANT ALL PRIVILEGES ON TABLE ghi TO someone;
+  - GRANT ALL PRIVILEGES ON TABLE jkl TO someone WITH GRANT OPTION;
+  - GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRUNCATE ON TABLE mno TO someone WITH GRANT OPTION;
+config:
+  roles:
+    someone:
+  databases:
+    - postgres
+  schemas:
+    - postgres.public
+  table_privileges:
+  - roles: [someone]
+    privileges: [SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRUNCATE, TRIGGER]
+    tables: [postgres.public.abc]
+  - roles: [someone]
+    privileges: [ALL PRIVILEGES]
+    tables: [postgres.public.def]
+  - roles: [someone]
+    privileges: [SELECT, INSERT, UPDATE, DELETE, REFERENCES, TRUNCATE, TRIGGER]
+    tables: [postgres.public.jkl]
+  - roles: [someone]
+    privileges: [ALL PRIVILEGES]
+    tables: [postgres.public.mno]
+expected:
+- "/*                 postgres */ GRANT ALL PRIVILEGES ON TABLE public.abc, public.def TO someone"
+- "/*                 postgres */ GRANT TRIGGER ON TABLE public.mno TO someone"
+- "/*                 postgres */ REVOKE ALL PRIVILEGES ON TABLE public.ghi FROM someone"
+- "/*                 postgres */ REVOKE GRANT OPTION FOR ALL PRIVILEGES ON TABLE public.jkl FROM someone"
+- "/*                 postgres */ REVOKE GRANT OPTION FOR SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES ON TABLE public.mno FROM someone"

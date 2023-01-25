@@ -62,7 +62,7 @@ func mergePrivileges(input []GenericPrivilege) []GenericPrivilege {
 	var ret []GenericPrivilege
 	for gapsat, tar := range groupAll {
 		gp := GenericPrivilege{
-			Privileges: gapsat.privilegeSet.List(),
+			Privileges: gapsat.privilegeSet.ListOrAll(t),
 			Grantable:  gapsat.grantable,
 			Roles:      tar.roles,
 		}
