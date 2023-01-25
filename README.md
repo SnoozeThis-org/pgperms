@@ -30,6 +30,8 @@ And finally you can sync your config file to the cluster:
 $ pgperms --user postgres --config pgperms.yaml --apply
 ```
 
+The password can be read from your .pgpass, or prompted by using `-W` .
+
 ## Managing roles
 
 pgperms is the source of truth for all roles defined in its config file. When syncing, it will make those roles have exactly the specified permissions.
