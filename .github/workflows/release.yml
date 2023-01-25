@@ -29,6 +29,20 @@ jobs:
         CGO_ENABLED: 0
         GOARCH: arm64
 
+    - name: Build for freebsd/amd64
+      run: go build -v -ldflags "-X main.version=${{github.ref_name}}" -o _publish/pgperms-freebsd-amd64 ./cmd/pgperms/
+      env:
+        CGO_ENABLED: 0
+        GOOS: freebsd
+        GOARCH: amd64
+
+    - name: Build for darwin/amd64
+      run: go build -v -ldflags "-X main.version=${{github.ref_name}}" -o _publish/pgperms-darwin-amd64 ./cmd/pgperms/
+      env:
+        CGO_ENABLED: 0
+        GOOS: darwin
+        GOARCH: amd64
+
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
