@@ -324,7 +324,7 @@ func fetchTypePrivileges(ctx context.Context, conn *pgx.Conn, database string, i
 			for grantable, ps := range tmp2 {
 				privs = append(privs, GenericPrivilege{
 					Roles:      []string{grantee},
-					Types:    []string{fqtn},
+					Types:      []string{fqtn},
 					Privileges: ps.ListOrAll("types"),
 					Grantable:  grantable,
 				})

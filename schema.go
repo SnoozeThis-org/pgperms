@@ -22,7 +22,7 @@ type Config struct {
 	// LanguagePrivileges           []GenericPrivilege `yaml:"language_privileges,omitempty"`
 	// LargeObjectPrivileges        []GenericPrivilege `yaml:"large_object_privileges,omitempty"`
 	// TablespacePrivileges         []GenericPrivilege `yaml:"tablespace_privileges,omitempty"`
-	TypePrivileges               []GenericPrivilege `yaml:"type_privileges,omitempty"`
+	TypePrivileges []GenericPrivilege `yaml:"type_privileges,omitempty"`
 }
 
 func (c Config) GetIgnoreSuperuserGrants() bool {
