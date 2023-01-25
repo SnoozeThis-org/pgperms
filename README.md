@@ -134,11 +134,15 @@ sequence_privileges:
       - mydatabase.otherschema.*
 ```
 
+## Type and domain permissions
+
+Types work similarly as the others. For the purposes of pgperms you should consider domains to simply be types.
+
 ## Contributions
 
 We'll happily accept your contributions! There's still a lot of things not supported:
 
-- Permissions on columns, domains, foreign data wrappers, foreign servers, routines, languages, large objects or tablespaces.
+- Permissions on columns, foreign data wrappers, foreign servers, routines, languages, large objects or tablespaces.
 - Set up default privileges so that newly created tables already have the correct permissions without having to run pgperms?
 - A config setting to automatically manage all users (and thus delete any unlisted users without needing to tombstone them).
 - More test cases

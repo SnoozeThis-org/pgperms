@@ -1,0 +1,16 @@
+preparation:
+  - CREATE DOMAIN abc AS TEXT;
+config:
+  roles:
+    someone:
+  databases:
+    - postgres
+  schemas:
+    - postgres.public
+  type_privileges:
+  - roles: [someone]
+    privileges: [USAGE]
+    types: [postgres.public.abc]
+expected:
+- "/*                          */ CREATE ROLE someone LOGIN"
+- "/*                 postgres */ GRANT USAGE ON TYPE public.abc TO someone"
