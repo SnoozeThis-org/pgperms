@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Jille/genericz/slicez"
 	"github.com/samber/lo"
-	"gogen.quis.cx/stringlib"
 )
 
 // TODO: Do we want to raise warnings for likely incorrect configurations? (RoleAttributes.Replication without RoleAttributes.Login etc)
@@ -98,14 +98,14 @@ func (v *validator) validatePrivileges(what string, privs []GenericPrivilege) {
 		if len(t) == 0 {
 			v.addErrorf("%s: privilege is missing %s field", src, what)
 		} else if len(t) > 1 {
-			v.addErrorf("%s: privilege has invalid fields: %v", src, stringlib.Diff(t, []string{what}))
+			v.addErrorf("%s: privilege has invalid fields: %v", src, slicez.Diff(t, []string{what}))
 		}
 		if what != t[0] {
 			v.addErrorf("%s: privilege has wrong target field (want %q, got %q)", src, what, t[0])
 		}
 		if len(p.Privileges) == 1 && p.Privileges[0] == "ALL PRIVILEGES" {
 			// OK
-		} else if unknown := stringlib.Diff(p.Privileges, validPrivileges[what]); len(unknown) > 0 {
+		} else if unknown := slicez.Diff(p.Privileges, validPrivileges[what]); len(unknown) > 0 {
 			v.addErrorf("%s: privilege has invalid privileges %v for %s_privileges", src, unknown, what[:len(what)-1])
 		}
 		for _, tgt := range p.untypedTargets() {

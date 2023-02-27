@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/Jille/dfr v1.0.0
+	github.com/Jille/genericz v0.1.0
 	github.com/creachadair/getpass v0.2.1
 	github.com/google/go-cmp v0.5.8
 	github.com/iancoleman/strcase v0.2.0
@@ -12,7 +13,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/xdg-go/pbkdf2 v1.0.0
 	github.com/xdg-go/scram v1.1.1
-	gogen.quis.cx/stringlib v0.0.0-20211012140410-76d47c45f099
+	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -27,7 +28,6 @@ require (
 	github.com/jackc/pgtype v1.11.0 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
-	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
