@@ -22,7 +22,7 @@ func mergePrivileges(input []GenericPrivilege) []GenericPrivilege {
 				if existing[grantee][target] == nil {
 					existing[grantee][target] = map[bool]privilegeSet{}
 				}
-				for _, priv := range o.Privileges {
+				for _, priv := range o.expandPrivileges() {
 					ps := existing[grantee][target][o.Grantable]
 					ps.Add(priv)
 					existing[grantee][target][o.Grantable] = ps
